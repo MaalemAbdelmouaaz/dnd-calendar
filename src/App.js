@@ -1,10 +1,12 @@
 import React, { useCallback, useState } from "react";
 import { Calendar, Views, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
+import "moment/locale/fr";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import events from "./events";
+import "./App.css";
 
 const localizer = momentLocalizer(moment);
 const DragAndDropCalendar = withDragAndDrop(Calendar);
@@ -15,8 +17,9 @@ export default function DragAndDrop() {
   const handleSelectSlot = useCallback(
     ({ start, end }) => {
       const title = window.prompt("New Event name");
+      let id = Math.random().toString();
       if (title) {
-        setMyEvents((prev) => [...prev, { start, end, title }]);
+        setMyEvents((prev) => [...prev, { id, start, end, title }]);
       }
     },
     [setMyEvents]
@@ -55,19 +58,20 @@ export default function DragAndDrop() {
   );
 
   return (
-    <DragAndDropCalendar
-      defaultView={Views.WEEK}
-      events={myEvents}
-      localizer={localizer}
-      onEventDrop={moveEvent}
-      onEventResize={resizeEvent}
-      onSelectSlot={handleSelectSlot}
-      min={new Date(0, 0, 0, 8, 0, 0)}
-      max={new Date(0, 0, 0, 23, 0, 0)}
-      selectable
-      popup
-      resizable
-      style={{ height: "820px" }}
-    />
+      <DragAndDropCalendar
+        defaultView={Views.WEEK}
+        events={myEvents}
+        localizer={localizer}
+        onEventDrop={moveEvent}
+        onEventResize={resizeEvent}
+        onSelectSlot={handleSelectSlot}
+        onSelectEvent={handleSelectEvent}
+        min={new Date(0, 0, 0, 8, 0, 0)}
+        max={new Date(0, 0, 0, 23, 0, 0)}
+        selectable
+        popup
+        resizable
+        style={{ height: "820px" }}
+      />
   );
 }
