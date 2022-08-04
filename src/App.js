@@ -1,34 +1,58 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { Calendar, Views, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "moment/locale/fr";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import events from "./events";
 import "./App.css";
+import FormModal from "./components/UI/FormModal";
+import Wrapper from "./helpers/Wrapper";
+import events from "./resources/events";
+
 
 const localizer = momentLocalizer(moment);
 const DragAndDropCalendar = withDragAndDrop(Calendar);
-
+// const events = JSON.parse(localStorage.getItem("events")) ?? [];
+console.log(events);
 export default function DragAndDrop() {
+  const clickRef = useRef(null)
   const [myEvents, setMyEvents] = useState(events);
+  const [myForm, setMyForm] = useState();
+  const [myData, setMyData] = useState();
+  const [time, setTime] = useState();
 
   const handleSelectSlot = useCallback(
     ({ start, end }) => {
-      const title = window.prompt("New Event name");
-      let id = Math.random().toString();
-      if (title) {
-        setMyEvents((prev) => [...prev, { id, start, end, title }]);
-      }
+      setMyForm(true);
+      setTime({ start, end });
     },
-    [setMyEvents]
+    [setMyForm]
   );
 
-  const handleSelectEvent = useCallback(
-    (event) => window.alert(event.title),
-    []
-  );
+  useEffect(() => {
+    let id = Math.random().toString();
+    let title = myData?.name;
+    let start = time?.start;
+    let end = time?.end;
+    if (title) {
+      setMyEvents((prev) => [...prev, { id, start, end, title }]);
+      setMyData();
+    }
+  }, [myData, time]);
+
+  
+  const onDoubleClickEvent = useCallback((calEvent) => {
+    /**
+     * Notice our use of the same ref as above.
+     */
+    window.clearTimeout(clickRef?.current)
+    clickRef.current = window.setTimeout(() => {
+      window.alert(`${calEvent.id} and ${calEvent.title}`);
+    }, 250)
+  }, [])
+
+  
 
   const moveEvent = useCallback(
     ({ event, start, end, isAllDay: droppedOnAllDaySlot = false }) => {
@@ -57,7 +81,13 @@ export default function DragAndDrop() {
     [setMyEvents]
   );
 
+  const formHandler = () => {
+    setMyForm(null);
+  };
+
   return (
+    <Wrapper>
+      {myForm && <FormModal setMyData={setMyData} onConfirm={formHandler} />}
       <DragAndDropCalendar
         defaultView={Views.WEEK}
         events={myEvents}
@@ -65,13 +95,14 @@ export default function DragAndDrop() {
         onEventDrop={moveEvent}
         onEventResize={resizeEvent}
         onSelectSlot={handleSelectSlot}
-        onSelectEvent={handleSelectEvent}
+        onDoubleClickEvent={onDoubleClickEvent}
         min={new Date(0, 0, 0, 8, 0, 0)}
         max={new Date(0, 0, 0, 23, 0, 0)}
+        resizable
         selectable
         popup
-        resizable
         style={{ height: "820px" }}
       />
+    </Wrapper>
   );
 }

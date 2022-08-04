@@ -47,11 +47,17 @@
 }
 
 .rbc-header {
-  color: blue;
-  padding: 15px;
+  text-align: left;
+  color: rgba(69, 157, 197, 0.685);
   height: 60px;
+  padding: 15px 5px;
 }
 
 .rbc-time-gutter {
   width: 100px;
 }
+
+.rbc-row-bg {
+  display: none;
+}
+  
